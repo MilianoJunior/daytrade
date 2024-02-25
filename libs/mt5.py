@@ -11,20 +11,6 @@ import threading
 import calendar
 
 clear = {
-    'Demo': {
-        'name': 'Metatrader 5 clear demo',
-        'login': 1193393312,
-        'password': '2718lej#JR4199',
-        'server': 'ClearInvestimentos-DEMO',
-        'assinatura': '35719726'
-    },
-    'Real': {
-        'name': 'Metatrader 5 clear real',
-        'login': '1000649229',
-        'password': None,
-        'server': 'ClearInvestimentos-CLEAR',
-        'assinatura': '35719726'
-    }
 
 }
 class MinhaThread(threading.Thread):
