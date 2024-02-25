@@ -262,9 +262,7 @@ class Dados():
 # testes
 
 if __name__ == '__main__':
-    # login = '1603115'
-    # password = '2718lej@JR'
-    # symbol = 'WINJ23'
+ 
     # start_day, end_day, month, year = 1,28,2,2023
     # conexao = Dados(login, password)
     # conexao.get_symbols(symbol)
