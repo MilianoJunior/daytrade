@@ -1,6 +1,21 @@
 '''
 Preciso que implemente um algoritmo de trading usando aprendizado por reforço. Com as seguintes características:
 
+Resumo:
+
+     A implementação de um algoritmo de trading usando aprendizado por reforço, com as seguintes características:
+        - O agente (trader) deve tomar ações de compra, venda ou manutenção de ações.
+        - O ambiente é o mercado de ações, com todas as suas variações e movimentos.
+        - O estado atual do mercado, incluindo informações como preço das ações, volume, notícias relevantes, etc.
+        - O objetivo do trader é maximizar a recompensa total ao longo do tempo.
+     Libs usadas:
+        - TensorFlow
+        - Pandas
+        - Numpy
+        - Matplotlib
+        - TF-Agents
+        - MetaTrader 5
+
 Aprendizado por reforço
 
     1 - Agente: O trader (ou o algoritmo de trading) é o agente.
@@ -299,45 +314,4 @@ avaliacao.print_summary()
 #     train_agent(env, policy, buffer)
 
 
-# Definir uma política aleatória
-# def random_policy(obs):
-#     return np.random.randint(obs)
-#
-# # definir política
-#
-# # Continuando a partir da sua definição de hiperparâmetros
-# for episode in range(num_episodes):
-#     # Resetar o ambiente no início de cada episódio
-#     time_step = env.reset()
-#     avaliacao.start_episode()
-#     cont = 0
-#
-#     while not time_step.is_last():
-#         cont += 1
-#         # Selecionar uma ação aleatória
-#         action = random_policy(3) # Considerando 3 ações: 0, 1, 2
-#
-#         # Aplicar a ação ao ambiente e obter o próximo estado
-#         next_time_step = env.step(action)
-#
-#
-#         # Registrar a ação e o resultado no Avaliacao
-#         avaliacao.record_step(env._state,
-#                               action,
-#                               time_step.observation[0],
-#                               time_step.reward,
-#                               env.position)  # Assumindo que `current_position` está definido no seu ambiente
-#
-#         # Atualizar o passo de tempo
-#         time_step = next_time_step
-#
-#     # Finalizar o episódio
-#     avaliacao.end_episode()
-#
-#     # Opcional: Exibir informações do episódio
-#     if episode % 100 == 0:
-#         print(f'Episódio {episode}: Recompensa Total = {avaliacao.get_total_reward()}')
-#
-# # Após todos os episódios, mostrar os resultados
-# avaliacao.plot_trading_results()
-# avaliacao.print_summary()
+
