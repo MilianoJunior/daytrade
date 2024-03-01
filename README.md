@@ -12,3 +12,8 @@ Para instalar as dependências necessárias, execute o seguinte comando:
 
 ```bash
 pip install -r requirements.txt
+
+```
+## Gerar um relatório sobre as regras de negócio
+
+## Quais as modificações que você fez no projeto
