@@ -81,23 +81,6 @@ class Dados():
             print(ERRO)
             return ERRO
 
-    def get_last_tick(self, symbol):
-        try:
-            # obtemos o último tick
-            last_tick = mt5.symbol_info_tick(symbol)._asdict()
-            if last_tick is None:
-                print("Falha ao obter o último tick")
-                return False
-            # print('------------------------------')
-            # print('Ultimo Tick')
-            # print('------------------------------')
-            # print(last_tick)
-            return last_tick
-        except Exception as e:
-            ERRO = f"Error: {inspect.currentframe().f_code.co_name}, {e},\n {mt5.last_error()}"
-            print(ERRO)
-            return ERRO
-
     def get_days_in_month(self, month, year):
         days_in_month = []
         for day in range(1, calendar.monthrange(year, month)[1] + 1):
@@ -304,19 +287,3 @@ if __name__ == '__main__':
     # conexao.get_symbol_book(symbol)
     # ticks = conexao.get_ticks(symbol, start_day, end_day, month, year)
     thread = MinhaThread().run()
-'''
-TICK_FLAG_BID — tick alterou o preço Bid
-TICK_FLAG_ASK  — tick alterou o preço Ask
-TICK_FLAG_LAST — tick alterou o último preço da oferta
-TICK_FLAG_VOLUME — tick alterou o volume
-TICK_FLAG_BUY — tick é resultado de uma compra
-TICK_FLAG_SELL — tick é resultado de uma venda
-'''
-flags = {
-    2: 'tick alterou o preço Bid',
-    4: 'tick alterou o preço Ask',
-    8: 'tick alterou o último preço da oferta',
-    16: 'tick alterou o volume',
-    32: 'tick é resultado de uma compra',
-    64: 'tick é resultado de uma venda'
-}
