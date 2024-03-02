@@ -9,57 +9,18 @@ import time
 import random
 import threading
 import calendar
+import os
 
-clear = {
-    'Demo': {
-        'name': 'Metatrader 5 clear demo',
-        'login': 1193393312,
-        'password': '2718lej#JR4199',
-        'server': 'ClearInvestimentos-DEMO',
-        'assinatura': '35719726'
-    },
-    'Real': {
-        'name': 'Metatrader 5 clear real',
-        'login': '1000649229',
-        'password': None,
-        'server': 'ClearInvestimentos-CLEAR',
-        'assinatura': '35719726'
-    }
 
-}
-class MinhaThread(threading.Thread):
-    def __init__(self):
-        threading.Thread.__init__(self)
-
-    def run(self):
-        # código a ser executado na thread
-        interval_ms = 100
-        i = 0
-        segundos = 0
-        login = clear['Demo']['login']
-        password = clear['Demo']['password']
-        symbol = 'WING24'
-        conexao = Dados(login, password)
-        conexao.get_symbol_info(symbol)
-        # conexao.get_terminal_info()
-        start_day, end_day, month, year = 20, 31, 1, 2024
-        # dias = conexao.get_days_in_month(month, year)
-        for dia in range(start_day, end_day):
-            print('                                ')
-            print('Dia: ', dia)
-            print('¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨')
-            ticks = conexao.get_ticks(symbol, dia, dia + 1, month, year)
-            # print(ticks)
-            if not ticks.empty:
-                for name in ticks.columns:
-                    print(' '*10,name, ticks[name][0])
-                    print(' '*10, name, ticks[name].values[-1])
-                    print(' '*10,'------------------------')
 class Dados():
     def __init__(self, user: str, password: str):
+        ''' Classe Dados, que herda de mt5. É responsável por conectar ao MetaTrader 5 e obter os dados necessários para o ambiente de negociação.'''
+
+        # Conectar ao MetaTrader 5
         self.conectar(user, password)
 
     def conectar(self, user, password):
+
         try:
             if not mt5.initialize():
                 print("Falha ao conectar ao MetaTrader 5")
@@ -82,13 +43,18 @@ class Dados():
             return ERRO
 
     def get_days_in_month(self, month, year):
+        '''Retorna a quantidade de dias em um mês'''
+
+        # Verificar a quantidade de dias em um mês
         days_in_month = []
         for day in range(1, calendar.monthrange(year, month)[1] + 1):
             days_in_month.append(day)
+
         return days_in_month
 
     def get_ticks(self, symbol: str, start_day: int, end_day, month: int, year: int):
-        # tratamento de exeção para dias não operaveis
+        ''' Retorna os ticks de um intervalo de tempo'''
+
         try:
             timezone = pytz.timezone("America/Sao_Paulo")
             # criamos o objeto datatime no fuso horário UTC para que não seja aplicado o deslocamento do fuso horário
@@ -109,6 +75,8 @@ class Dados():
             return ERRO
 
     def get_profit(self):
+        ''' Retorna o lucro da conta'''\
+
         try:
             print('------------------------------')
             print('Informações da Conta')
@@ -123,6 +91,8 @@ class Dados():
             return ERRO
 
     def get_terminal_info(self):
+        ''' Retorna informações sobre o terminal'''
+
         try:
             terminal_info = mt5.terminal_info()
             if terminal_info != None:
@@ -139,6 +109,8 @@ class Dados():
             return ERRO
 
     def get_symbol_info(self, symbol):
+        ''' Retorna informações sobre um símbolo'''
+
         try:
             print('------------------------------')
             print('Informaçãoes do Simbolo')
@@ -154,6 +126,8 @@ class Dados():
             return ERRO
 
     def get_symbol_book(self, symbol):
+        ''' Retorna o livro de ofertas para um símbolo'''
+
         try:
             print('------------------------------')
             print('Profudindade do Mercado')
@@ -185,6 +159,8 @@ class Dados():
             return ERRO
 
     def get_symbols(self, search: str = ''):
+        ''' Retorna os símbolos disponíveis no MetaTrader 5'''
+
         try:
             print('------------------------------')
             simbolos = mt5.symbols_get()
@@ -198,6 +174,8 @@ class Dados():
             return ERRO
 
     def convert_time(self):
+        ''' Converte o tempo para o fuso horário de São Paulo'''
+
         try:
             date_time = pd.to_datetime(self.base1.pop('date'), format='%Y.%m.%d %H:%M:%S')
             timestamp_s = date_time.map(datetime.datetime.timestamp)
@@ -211,6 +189,8 @@ class Dados():
             return ERRO
 
     def select_symbol(self, symbol):
+        ''' Seleciona um símbolo no MetaTrader 5'''
+
         try:
             selected = mt5.symbol_select(symbol, True)
             if not selected:
@@ -223,6 +203,8 @@ class Dados():
             return ERRO
 
     def comprar(self, symbol, volume):
+        ''' Realiza uma ordem de compra'''
+
         try:
             request = {
                 "action": mt5.TRADE_ACTION_DEAL,
@@ -248,6 +230,8 @@ class Dados():
             return ERRO
 
     def vender(self, symbol, volume):
+        ''' Realiza uma ordem de venda'''
+
         try:
             request = {
                 "action": mt5.TRADE_ACTION_DEAL,
@@ -272,18 +256,3 @@ class Dados():
             print(ERRO)
             return ERRO
 
-
-# testes
-
-if __name__ == '__main__':
-    # login = '1603115'
-    # password = '2718lej@JR'
-    # symbol = 'WINJ23'
-    # start_day, end_day, month, year = 1,28,2,2023
-    # conexao = Dados(login, password)
-    # conexao.get_symbols(symbol)
-    # conexao.get_profit()
-    # conexao.get_symbol_info(symbol)
-    # conexao.get_symbol_book(symbol)
-    # ticks = conexao.get_ticks(symbol, start_day, end_day, month, year)
-    thread = MinhaThread().run()
