@@ -1,4 +1,6 @@
 import os, sys
+import time
+
 import pandas as pd
 import numpy as np
 import tensorflow as tf
@@ -22,30 +24,17 @@ os.environ['ROOT'] = BASE_DIR
     configurações dos parâmetros
 '''
 
-mode = 'rondom'
+mode = 'rondom'    # Modo do Agente (Rondomico, Modelo)
+num_episodes = 1   # Defina o número de episódios para treinamento
 
 '''
 instanciar classes
 '''
 
-env = B3()
-
-raise Exception
-
-agente = Agente()
+env = B3()   # Simula o ambiente de negociação da bolsa de valores
+agente = Agente('random')
 avaliacao_agente = TradingDataStore()
 
-
-
-def random_policy(obs):
-    ''' Retorna uma ação aleatória '''
-    return np.random.randint(obs)
-
-def agente_policy(obs):
-    ''' Retorna a ação do agente '''
-    return agente.decide_action(obs)
-
-num_episodes = 1  # Defina o número de episódios para treinamento
 
 for episode in range(num_episodes):
     state = env.reset()  # Inicializa o ambiente
@@ -53,7 +42,7 @@ for episode in range(num_episodes):
     cont = 0
     while True:
         # action = agente.decide_action(state.observation)  # O agente decide a ação
-        action = np.random.randint(3)
+        action = agente.decide_action()
         next_state = env.step(action)  # Atualiza o ambiente com a ação do agente
         reward = next_state.reward  # Obtem a recompensa
         episode_reward += reward
@@ -67,6 +56,7 @@ for episode in range(num_episodes):
         print(cont, ' State: ', state.observation,' Preco Adq.: ',env.price_adquire, ' Ação: ', action, ' Recompensa: ', reward, ' Posição: ', env.position)
 
     print(f'Episódio: {episode}, Recompensa Total: {episode_reward}')
+        # time.sleep(1)
     avaliacao.end_episode()  # Finaliza o episódio no sistema de avaliação
 
 avaliacao.plot_trading_results()  # Plota os resultados do trading

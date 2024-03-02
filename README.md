@@ -32,3 +32,13 @@ O ambiente de negociação é mapeado para um espaço de estados e ações.
 ## Gerar um relatório sobre as regras de negócio
 
 ## Quais as modificações que você fez no projeto
+
+
+windi = 125.650
+
+
+compra = 125.65
+
+windi = 125.690
+
+Venda = 40
