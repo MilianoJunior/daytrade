@@ -6,8 +6,8 @@ import tensorflow as tf
 from tf_agents.environments import py_environment
 from tf_agents.trajectories import time_step as ts
 from tf_agents.specs import array_spec
-from reforcing_learning.libs.mt5 import Dados
-from reforcing_learning.libs.padroes import Padroes
+from libs.mt5 import Dados
+from libs.padroes import Padroes
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -24,9 +24,15 @@ class B3(py_environment.PyEnvironment):
         super(B3, self).__init__()
 
         # aplicar configurações para o ambiente
-        self.mode = config.get('mode', 'demo')
-        if self.mode == 'demo':
-            self.data = Dados(login, password).get_ticks(symbol, 16, 17, 2, 2024)
+        self.mode = config.get('mode', 'random')
+        print(config)
+        if self.mode == 'random':
+            try:
+                self.data = Dados(config.get('login',False), config.get('password',False)).get_ticks(symbol, 16, 17, 2, 2024)
+            except:
+                # gerar dados aleatórios
+                print('Erro ao buscar dados da B3. Gerando dados aleatórios.')
+                self.data = Padroes().get_ticks()
         else:
             self.data = Dados(login, password).get_last_tick(symbol)
         self.data.index = pd.to_datetime(self.data['time'], unit='s')

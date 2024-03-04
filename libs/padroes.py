@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import time
+import pandas as pd
+import numpy as np
 
 flags = {
     2: 'tick alterou o preço Bid',
@@ -150,6 +152,49 @@ class Padroes:
 
 
         return []
+    def get_ticks(self):
+        """
+        Retorna os ticks de uma série.
+        """
+        # Definir o número de linhas de dados
+        num_rows = 10
+
+        # Gerar horários aleatórios dentro do intervalo especificado (convertido para segundos para facilitar)
+        time_start = pd.Timestamp('2024-03-03 09:00').timestamp()
+        time_end = pd.Timestamp('2024-03-03 18:00').timestamp()
+        times = np.random.randint(time_start, time_end, num_rows)
+
+        # Gerar bid, ask, last dentro do intervalo especificado, garantindo que o spread esteja dentro das regras
+        bid = np.random.uniform(129000, 131000, num_rows) / 1000
+        ask = bid + np.random.choice([5, 10, 15, 20], num_rows) / 1000
+        last = np.random.uniform(129000, 131000, num_rows) / 1000
+
+        # Garantir que todos os valores estejam dentro do intervalo permitido
+        ask = np.where(ask > 131, 131, ask)
+        last = np.where(last > 131, 131, last)
+
+        # Gerar volume e volume_real
+        volume = np.random.randint(1, 101, num_rows)
+        volume_real = np.random.randint(1, 101, num_rows)
+
+        # Manter time_msc constante como fornecido
+        time_msc = np.full(num_rows, 1585070338728)
+
+        # Gerar flags aleatoriamente
+        flags = np.random.choice([2, 4, 8, 16, 32, 64], num_rows)
+
+        # Criar o DataFrame
+        df = pd.DataFrame({
+            'time': times.astype(int),
+            'bid': bid,
+            'ask': ask,
+            'last': last,
+            'volume': volume,
+            'time_msc': time_msc,
+            'flags': flags,
+            'volume_real': volume_real
+        })
+        return df
 
 # bid_counts = serie['bid'].value_counts()
 # ask_counts = serie['ask'].value_counts()
@@ -169,3 +214,20 @@ class Padroes:
 # print(bid_counts)
 # print(ask_counts)
 # return []
+'''
+preciso criar dados aleatórios para testar a função no formato de dataframe
+
+intervalor das variaveis
+time = 9:00 até as 18:00 horas
+bid = 129.000 até 131.000
+ask = 129.000 até 131.000
+last = 129.000 até 131.000
+volume = 1 até 100
+time_msc = 1585070338728
+flags = 2, 4, 8, 16, 32, 64
+volume_real = 1 até 100
+
+A diferença entre o preço de compra e venda é chamada de spread. E deve ser com valores multiplos de 5 e com no máximo 20 pontos.
+
+(time=1585070338, bid=131.310, ask=131.315, last=131.320, volume=1, time_msc=1585070338728, flags=2, volume_real=1)
+'''
