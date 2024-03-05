@@ -66,7 +66,7 @@ class Dados():
             # Convertemos para pandas dataframe
             ticks_ = pd.DataFrame(ticks_)
             # transformar timestamp em segundos
-            ticks_['time'] = pd.to_datetime(ticks_['time'], unit='s')
+            # ticks_['time'] = pd.to_datetime(ticks_['time'], unit='s')
             # ticks_.set_index('time',inplace=True)
             return ticks_
         except Exception as e:

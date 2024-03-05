@@ -8,6 +8,7 @@ from tf_agents.trajectories import time_step as ts
 from tf_agents.specs import array_spec
 from libs.mt5 import Dados
 from libs.padroes import Padroes
+from libs.utils import excluir_zeros, excluir_valores
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -28,15 +29,21 @@ class B3(py_environment.PyEnvironment):
         print(config)
         if self.mode == 'random':
             try:
-                self.data = Dados(config.get('login',False), config.get('password',False)).get_ticks(symbol, 16, 17, 2, 2024)
-            except:
+                self.data = Dados(config.get('login',False), config.get('password',False)).get_ticks(config.get('symbol',False), 16, 17, 2, 2024)
+                self.data = excluir_zeros(self.data)
+                self.data = excluir_valores(self.data)
+
+            except Exception as e:
+                print(e)
                 # gerar dados aleatórios
                 print('Erro ao buscar dados da B3. Gerando dados aleatórios.')
                 self.data = Padroes().get_ticks()
         else:
-            self.data = Dados(login, password).get_last_tick(symbol)
-        self.data.index = pd.to_datetime(self.data['time'], unit='s')
-        self.data = self.data.drop(columns=['time'])
+            self.data = Dados(login, password).get_last_tick(config.get('symbol',False))
+        # self.data.index = pd.to_datetime(self.data['time'], unit='s')
+        # self.data = self.data.drop(columns=['time'])
+        print(self.data.head(10))
+        print('-' * 50)
         self.index = 0
         self.time_frame = 1
 
@@ -51,6 +58,7 @@ class B3(py_environment.PyEnvironment):
         self._state = None
         self.position = 0
         self.price_adquire = 0
+        self.price_despach = 0
 
     def action_spec(self):
         '''Retorna o espaço de ação'''
@@ -68,6 +76,7 @@ class B3(py_environment.PyEnvironment):
         self.index = 0
         self._episode_ended = False
         self._state = 0
+        self.position = 0
         numeric_data = self.data.select_dtypes(include=[np.number]).values[self.index]
         return ts.restart(np.array(numeric_data, dtype=np.float32))
 
@@ -84,14 +93,15 @@ class B3(py_environment.PyEnvironment):
         # Atualiza o estado (aqui pode-se avançar no time frame)
         self._state = (self._state + self.time_frame) % len(self.data)
 
+        # print('Índice:', self._state)
         # atualiza o estado do ambiente
         if self._state >= len(self.data) - self.time_frame:
             self._episode_ended = True
             print('Episódio terminado')
 
         # novo time_step com os dados do ambiente
-        numeric_data = self.data.select_dtypes(include=[np.number]).values[self._state]
-
+        # numeric_data = self.data.select_dtypes(include=[np.number]).values[self._state]
+        numeric_data = self.data.iloc[self._state]
         # Retorna o novo time_step
         if self._episode_ended:
             return ts.termination(np.array(numeric_data, dtype=np.float32), recompensa)
@@ -125,7 +135,7 @@ class B3(py_environment.PyEnvironment):
 
         ask = self.data.iloc[self._state]['ask']
         bid = self.data.iloc[self._state]['bid']
-
+        print(' '*10, 'ask:', ask, ' bid:', bid)
         # Sem posição: Se a posição for 0, pode comprar, vender ou manter
         if self.position == 0:
             if action == 0:
@@ -151,8 +161,8 @@ class B3(py_environment.PyEnvironment):
                 recompensa = self.price_adquire - bid
             else:
                 self.position = 0
-                self.price_adquire = 0
                 recompensa = self.price_adquire - bid
+                self.price_adquire = 0
             return recompensa
 
         # Vendido: Se a posição for 2, pode manter ou comprar

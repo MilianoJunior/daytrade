@@ -38,3 +38,34 @@ def tratar_dataframe(data):
         print('Erro ao processar o DataFrame: ', e)
         raise e
 
+def excluir_zeros(df):
+    """
+    Exclui as linhas que contém zeros do DataFrame.
+
+    :param df: DataFrame contendo os dados do WIN$.
+    :return: DataFrame sem as linhas que contém zeros.
+    """
+    try:
+        # Excluir as linhas que contém zeros
+        df = df[(df != 0).all(1)]
+
+        return df
+    except Exception as e:
+        print('Erro ao excluir as linhas que contém zeros: ', e)
+        raise e
+
+def excluir_valores(df):
+    ''' Exclui valores discrepantes'''
+    try:
+        # verifica as diferenças entre os valores das colunas bid e ask
+        df['diferenca'] = df['ask'] - df['bid']
+        df_counts = df['diferenca'].value_counts()
+        # print('diferenca:', df_counts)
+        # print('----'*10)
+        df = df[(df['diferenca'] < 50) & (df['diferenca'] > -50)]
+        df_counts = df['diferenca'].value_counts()
+        # print('diferenca:', df_counts)
+        return df
+    except Exception as e:
+        print('Erro ao excluir as linhas que contém zeros: ', e)
+        raise e
