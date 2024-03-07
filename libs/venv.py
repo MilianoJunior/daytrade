@@ -59,6 +59,8 @@ class B3(py_environment.PyEnvironment):
         self.position = 0
         self.price_adquire = 0
         self.price_despach = 0
+        self.price_bid =  self.data.iloc[0]['ask']
+        self.price_ask = self.data.iloc[0]['bid']
 
     def action_spec(self):
         '''Retorna o espaço de ação'''
@@ -83,6 +85,28 @@ class B3(py_environment.PyEnvironment):
     def _step(self, action):
         '''Aplica uma ação e retorna o novo estado, recompensa e se o episódio terminou. '''
 
+        # Faz um filtro de ticks para o ambiente, dando o próximo _state caso o tick mude de valor ou o volume atinja um valor == 10 no mesmo tick
+        while True:
+            ask = self.data.iloc[self._state]['ask']  # Preço que um vendedor está disposto a aceitar
+            bid = self.data.iloc[self._state]['bid']  # Preço que um comprador está disposto a pagar
+
+            if bid != self.price_bid or ask != self.price_ask:
+                self.price_bid = bid
+                self.price_ask = ask
+                break
+
+            if self._state + self.time_frame >= len(self.data):
+                self._episode_ended = True
+                print('Episódio terminado')
+                break
+
+            # Atualiza o estado (aqui pode-se avançar no time frame)
+
+            self._state = (self._state + self.time_frame) % len(self.data)
+            if self._state % 10000 == 0:
+                print('...'*20, self._state, 'ask:', ask, ' bid:', bid)
+            # print('...'*20, self._state, 'ask:', ask, ' bid:', bid)
+
         # O último passo terminou o episódio. Chama reset para iniciar um novo episódio.
         if self._episode_ended:
             return self.reset()
@@ -90,8 +114,7 @@ class B3(py_environment.PyEnvironment):
         # calcula a recompensa
         recompensa = self._calcular_recompensa(action)
 
-        # Atualiza o estado (aqui pode-se avançar no time frame)
-        self._state = (self._state + self.time_frame) % len(self.data)
+
 
         # print('Índice:', self._state)
         # atualiza o estado do ambiente
@@ -133,19 +156,44 @@ class B3(py_environment.PyEnvironment):
 
         recompensa = 0
 
-        ask = self.data.iloc[self._state]['ask']
-        bid = self.data.iloc[self._state]['bid']
-        print(' '*10, 'ask:', ask, ' bid:', bid)
+        ask = self.data.iloc[self._state]['ask'] # Preço que um vendedor está disposto a aceitar
+        bid = self.data.iloc[self._state]['bid'] # Preço que um comprador está disposto a pagar
+        # print('...'*20, 'ask:', ask, ' bid:', bid)
         # Sem posição: Se a posição for 0, pode comprar, vender ou manter
+        '''
+        Considere as operações de compra e venda de ações. O agente pode comprar, vender ou manter a posição.
+
+        ask: Preço que um vendedor está disposto a aceitar
+        bid: Preço que um comprador está disposto a pagar
+        last: Último preço negociado
+
+        Se estou comprado, a recompensa é a diferença entre o preço de aquisição e o preço de venda.
+        Se estou vendido, a recompensa é a diferença entre o preço de aquisição e o preço de compra.
+
+        formulas para calcular a recompensa:
+        
+        comprar
+            preco_adquire = ask
+            recompensa = bid - preco_adquire
+            
+        vender
+            preco_adquire = bid
+            recompensa =  preco_adquire - ask
+
+        comprado: recompensa = preço de venda - preço de aquisição
+        vendido: recompensa = preço de aquisição - preço de compra
+        '''
         if self.position == 0:
             if action == 0:
                 self.position = action
                 recompensa = 0
             elif action == 1:
+                # se estiver comprando, o preço de aquisição é o ask
                 self.position = action
                 self.price_adquire = round(ask)
                 recompensa = 0
             else:
+                # se estiver vendendo, o preço de aquisição é o bid
                 self.position = action
                 self.price_adquire = round(bid)
                 recompensa = 0
@@ -153,30 +201,33 @@ class B3(py_environment.PyEnvironment):
 
         # Comprado: Se a posição for 1, pode manter ou vender
         elif self.position == 1:
+            recompensa = bid - self.price_adquire
             if action == 0:
                 self.position = 1
-                recompensa = self.price_adquire - bid
+                # recompensa = self.price_adquire - ask
+
             elif action == 1:
                 self.position = action
-                recompensa = self.price_adquire - bid
+                # recompensa = self.price_adquire - ask
             else:
                 self.position = 0
-                recompensa = self.price_adquire - bid
+                # recompensa = self.price_adquire - ask
                 self.price_adquire = 0
             return recompensa
 
         # Vendido: Se a posição for 2, pode manter ou comprar
         else:
+            recompensa = self.price_adquire - ask
             if action == 0:
                 self.position = 2
-                recompensa = ask - self.price_adquire
+                # recompensa = bid - self.price_adquire
             elif action == 1:
                 self.position = 0
-                recompensa = ask - self.price_adquire
+                # recompensa = bid - self.price_adquire
                 self.price_adquire = 0
             else:
                 self.position = action
-                recompensa = ask - self.price_adquire
+                # recompensa = bid - self.price_adquire
             return recompensa
 
 
@@ -211,3 +262,18 @@ if __name__ == '__main__':
 
         print('-' * 50)
 
+'''
+Considere as operações de compra e venda de ações. O agente pode comprar, vender ou manter a posição.
+
+ask: Preço que um vendedor está disposto a aceitar
+bid: Preço que um comprador está disposto a pagar
+last: Último preço negociado
+
+Se estou comprado, a recompensa é a diferença entre o preço de aquisição e o preço de venda.
+Se estou vendido, a recompensa é a diferença entre o preço de aquisição e o preço de compra.
+
+formulas para calcular a recompensa:
+
+comprado: recompensa = preço de venda - preço de aquisição
+vendido: recompensa = preço de aquisição - preço de compra
+'''

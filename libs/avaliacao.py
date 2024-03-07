@@ -18,18 +18,18 @@ class TradingDataStore:
         self.contador = 0
         self.cont = 0
         self.cumulative_rewards = 0
-        self.position_data = pd.DataFrame(columns=['ordem','horario entrada','horario saida', 'ativo','tipo','preco entrada','preco saida','resultado'])
+        self.position_data = pd.DataFrame(columns=['ordem','horario entrada','horario saida','duracao','ativo','tipo','preco entrada','preco saida','resultado'])
 
     def record_step(self, state, action, next_state, reward, position, price_adquire, verbose=False):
         ''' Armazena as experiências do agente a cada interação com o ambiente'''
 
         self.cumulative_rewards += reward
-        self.data['actions'].append(action)
-        self.data['prices'].append(next_state)
-        self.data['rewards'].append(reward)
-        self.data['positions'].append(position)
-        self.data['cumulative_rewards_const'] = self.cumulative_rewards
-        self.data['cumulative_rewards'].append(self.cumulative_rewards)
+        # self.data['actions'].append(action)
+        # self.data['prices'].append(next_state)
+        # self.data['rewards'].append(reward)
+        # self.data['positions'].append(position)
+        # self.data['cumulative_rewards_const'] = self.cumulative_rewards
+        # self.data['cumulative_rewards'].append(self.cumulative_rewards)
         self.cont += 1
 
         if self.ordem == 0 and position == 1:
@@ -66,6 +66,7 @@ class TradingDataStore:
             print('Compra encerrada')
             print('-------------------')
             self.position_data.loc[self.contador, 'horario saida'] = pd.to_datetime(state.observation[0], unit='s')
+            self.position_data.loc[self.contador, 'duracao'] = self.position_data.loc[self.contador, 'horario saida'] - self.position_data.loc[self.contador, 'horario entrada']
             self.position_data.loc[self.contador, 'preco saida'] = next_state.observation[1]
             self.position_data.loc[self.contador, 'resultado'] = reward
             self.ordem = 0
@@ -74,7 +75,9 @@ class TradingDataStore:
             print('Venda encerrada')
             print('-------------------')
             self.position_data.loc[self.contador, 'horario saida'] = pd.to_datetime(state.observation[0], unit='s')
-            self.position_data.loc[self.contador, 'preco saida'] = next_state.observation[1]
+            self.position_data.loc[self.contador, 'duracao'] = self.position_data.loc[self.contador, 'horario saida'] - \
+                                                               self.position_data.loc[self.contador, 'horario entrada']
+            self.position_data.loc[self.contador, 'preco saida'] = next_state.observation[2]
             self.position_data.loc[self.contador, 'resultado'] = reward
             self.ordem = 0
     def record_position(self, position):

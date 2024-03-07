@@ -53,7 +53,7 @@ for episode in range(0,config['num_episodes']):
         # Armazena e avalia o desempenho
         avaliacao.record_step(state, action, next_state, reward, env.position, env.price_adquire, verbose=False)
         cont += 1
-        if next_state.step_type == 'TERMINAL' or cont > 20:  # Verifica se o episódio terminou
+        if next_state.step_type == 'TERMINAL' or cont > 20000:  # Verifica se o episódio terminou
             break
         state = next_state
 
