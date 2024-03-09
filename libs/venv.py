@@ -26,6 +26,7 @@ class B3(py_environment.PyEnvironment):
 
         # aplicar configurações para o ambiente
         self.mode = config.get('mode', 'random')
+        self.conti = 0
         print(config)
         if self.mode == 'random':
             try:
@@ -61,6 +62,7 @@ class B3(py_environment.PyEnvironment):
         self.price_despach = 0
         self.price_bid =  self.data.iloc[0]['ask']
         self.price_ask = self.data.iloc[0]['bid']
+        self.volume = 0
 
     def action_spec(self):
         '''Retorna o espaço de ação'''
@@ -87,12 +89,19 @@ class B3(py_environment.PyEnvironment):
 
         # Faz um filtro de ticks para o ambiente, dando o próximo _state caso o tick mude de valor ou o volume atinja um valor == 10 no mesmo tick
         while True:
+            self._state = (self._state + self.time_frame) % len(self.data)
             ask = self.data.iloc[self._state]['ask']  # Preço que um vendedor está disposto a aceitar
             bid = self.data.iloc[self._state]['bid']  # Preço que um comprador está disposto a pagar
-
-            if bid != self.price_bid or ask != self.price_ask:
+            self.conti += 1
+            self.volume += self.data.iloc[self._state]['volume']
+            if bid != self.price_bid or ask != self.price_ask: # or self.volume > 10:
                 self.price_bid = bid
                 self.price_ask = ask
+                print(' '*20,'...'*20)
+                print(' '*40,'conti: ',self.conti,'state: ',self._state, 'ask:', ask, ' bid:', bid, ' volume:', self.volume)
+                print(' '*20,'...' * 20)
+                self.conti = 0
+                self.volume = 0
                 break
 
             if self._state + self.time_frame >= len(self.data):
@@ -102,10 +111,10 @@ class B3(py_environment.PyEnvironment):
 
             # Atualiza o estado (aqui pode-se avançar no time frame)
 
-            self._state = (self._state + self.time_frame) % len(self.data)
-            if self._state % 10000 == 0:
-                print('...'*20, self._state, 'ask:', ask, ' bid:', bid)
+
+            # if self._state % 10000 == 0:
             # print('...'*20, self._state, 'ask:', ask, ' bid:', bid)
+            # print('...'*20, self._state, 'ask:', ask, ' bid:', bid) 1 - 119445 2 -
 
         # O último passo terminou o episódio. Chama reset para iniciar um novo episódio.
         if self._episode_ended:
