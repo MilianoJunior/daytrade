@@ -19,6 +19,7 @@ class TradingDataStore:
         self.cont = 0
         self.cumulative_rewards = 0
         self.position_data = pd.DataFrame(columns=['ordem','horario entrada','horario saida','duracao','ativo','tipo','preco entrada','preco saida','resultado','acumulado'])
+        self.data = []
 
     def record_step(self, state, action, next_state, reward, position, price_adquire, verbose=False):
         ''' Armazena as experiências do agente a cada interação com o ambiente'''
@@ -27,9 +28,9 @@ class TradingDataStore:
 
         if self.ordem == 0 and position == 1:
             self.contador += 1
-            print('...' * 25)
-            print(self.contador, ' Comprado')
-            print('...' * 25)
+            # print('...' * 25)
+            # print(self.contador, ' Comprado')
+            # print('...' * 25)
             # print(self.contador,' Comprado')
             self.position_data.loc[self.contador,'ordem'] = self.contador
             self.position_data.loc[self.contador,'horario entrada'] =pd.to_datetime(state.observation[0], unit='s')
@@ -41,9 +42,9 @@ class TradingDataStore:
 
         if self.ordem == 0 and position == 2:
             self.contador += 1
-            print('...' * 25)
-            print(self.contador, ' Vendido')
-            print('...' * 25)
+            # print('...' * 25)
+            # print(self.contador, ' Vendido')
+            # print('...' * 25)
             # print(self.contador,' Vendido')
             self.position_data.loc[self.contador, 'ordem'] = self.contador
             self.position_data.loc[self.contador, 'horario entrada'] = pd.to_datetime(state.observation[0], unit='s')
@@ -53,21 +54,21 @@ class TradingDataStore:
 
             self.ordem = 2
 
-        print(' ' * 5, self.cont,
-              ' Preco Adq.:', price_adquire,
-              ' Ação:', action,
-              ' Recomp.:', reward,
-              ' Pos.:', position,
-              ' Act bid:', state.observation[1],
-              ' ask:',state.observation[2],
-              ' Next bid:', next_state.observation[1],
-              ' ask:',next_state.observation[2],
-              ' vol:', state.observation[4],
-              ' Cum. Recomp.:', self.cumulative_rewards)
+        # print(' ' * 5, self.cont,
+        #       ' Preco Adq.:', price_adquire,
+        #       ' Ação:', action,
+        #       ' Recomp.:', reward,
+        #       ' Pos.:', position,
+        #       ' Act bid:', state.observation[1],
+        #       ' ask:',state.observation[2],
+        #       ' Next bid:', next_state.observation[1],
+        #       ' ask:',next_state.observation[2],
+        #       ' vol:', state.observation[4],
+        #       ' Cum. Recomp.:', self.cumulative_rewards)
 
         if self.ordem == 1 and position == 0:
-            print('Compra encerrada')
-            print('-------------------')
+            # print('Compra encerrada')
+            # print('-------------------')
             self.cumulative_rewards += reward
             self.position_data.loc[self.contador, 'horario saida'] = pd.to_datetime(state.observation[0], unit='s')
             self.position_data.loc[self.contador, 'duracao'] = self.position_data.loc[self.contador, 'horario saida'] - self.position_data.loc[self.contador, 'horario entrada']
@@ -77,8 +78,8 @@ class TradingDataStore:
             self.ordem = 0
 
         if self.ordem == 2 and position == 0:
-            print('Venda encerrada')
-            print('-------------------')
+            # print('Venda encerrada')
+            # print('-------------------')
             self.cumulative_rewards += reward
             self.position_data.loc[self.contador, 'horario saida'] = pd.to_datetime(state.observation[0], unit='s')
             self.position_data.loc[self.contador, 'duracao'] = self.position_data.loc[self.contador, 'horario saida'] - \
@@ -87,6 +88,8 @@ class TradingDataStore:
             self.position_data.loc[self.contador, 'resultado'] = reward
             self.position_data.loc[self.contador, 'acumulado'] = self.cumulative_rewards
             self.ordem = 0
+
+        self.data.append([state.observation, action, reward, next_state.observation])
     def record_position(self, position):
         ''' Armazena a posição do agente'''
 

@@ -8,7 +8,7 @@ from tf_agents.trajectories import time_step as ts
 from tf_agents.specs import array_spec
 from libs.mt5 import Dados
 from libs.padroes import Padroes
-from libs.utils import excluir_zeros, excluir_valores
+from libs.utils import excluir_zeros, excluir_valores, normalize
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -25,26 +25,24 @@ class B3(py_environment.PyEnvironment):
         super(B3, self).__init__()
 
         # aplicar configurações para o ambiente
-        self.mode = config.get('mode', 'random')
+        self.mode = config.get('policy', 'random')
         self.conti = 0
-        print(config)
         if self.mode == 'random':
             try:
                 self.data = Dados(config.get('login',False), config.get('password',False)).get_ticks(config.get('symbol',False), 16, 17, 2, 2024)
                 self.data = excluir_zeros(self.data)
                 self.data = excluir_valores(self.data)
-
             except Exception as e:
-                print(e)
-                # gerar dados aleatórios
-                print('Erro ao buscar dados da B3. Gerando dados aleatórios.')
+                print('Erro ao buscar dados da B3. Gerando dados aleatórios: ', e)
                 self.data = Padroes().get_ticks()
         else:
-            self.data = Dados(login, password).get_last_tick(config.get('symbol',False))
-        # self.data.index = pd.to_datetime(self.data['time'], unit='s')
-        # self.data = self.data.drop(columns=['time'])
-        print(self.data.head(10))
-        print('-' * 50)
+            # self.data = Dados(login, password).get_last_tick(config.get('symbol',False))
+            self.data = Dados(config.get('login', False), config.get('password', False)).get_ticks(
+                config.get('symbol', False), 16, 17, 2, 2024)
+            self.data = excluir_zeros(self.data)
+            self.data = excluir_valores(self.data)
+            # self.data = normalize(self.data)
+
         self.index = 0
         self.time_frame = 1
 
@@ -94,12 +92,21 @@ class B3(py_environment.PyEnvironment):
             bid = self.data.iloc[self._state]['bid']  # Preço que um comprador está disposto a pagar
             self.conti += 1
             self.volume += self.data.iloc[self._state]['volume']
+            if self._state % 100000 == 0:
+                percentual = (self._state / len(self.data)) * 100
+                print(' ' * 20, '...' * 20)
+                print(' ' * 20, 'Percentual:', round(percentual, 2), '%', self._state, len(self.data))
+                print(' ' * 20, '...' * 20)
+
+                # time.sleep(3)
             if bid != self.price_bid or ask != self.price_ask: # or self.volume > 10:
                 self.price_bid = bid
                 self.price_ask = ask
-                print(' '*20,'...'*20)
-                print(' '*40,'conti: ',self.conti,'state: ',self._state, 'ask:', ask, ' bid:', bid, ' volume:', self.volume)
-                print(' '*20,'...' * 20)
+
+
+                # print(' '*20,'...'*20)
+                # print(' '*40,'conti: ',self.conti,'state: ',self._state, 'ask:', ask, ' bid:', bid, ' volume:', self.volume)
+                # print(' '*20,'...' * 20)
                 self.conti = 0
                 self.volume = 0
                 break
@@ -139,6 +146,7 @@ class B3(py_environment.PyEnvironment):
             return ts.termination(np.array(numeric_data, dtype=np.float32), recompensa)
         else:
             return ts.transition(np.array(numeric_data, dtype=np.float32), recompensa)
+            # return ts.termination(np.array(numeric_data, dtype=np.float32), recompensa)
 
     # Método para calcular a recompensa
     def _calcular_recompensa(self, action):
@@ -167,31 +175,7 @@ class B3(py_environment.PyEnvironment):
 
         ask = self.data.iloc[self._state]['ask'] # Preço que um vendedor está disposto a aceitar
         bid = self.data.iloc[self._state]['bid'] # Preço que um comprador está disposto a pagar
-        # print('...'*20, 'ask:', ask, ' bid:', bid)
-        # Sem posição: Se a posição for 0, pode comprar, vender ou manter
-        '''
-        Considere as operações de compra e venda de ações. O agente pode comprar, vender ou manter a posição.
 
-        ask: Preço que um vendedor está disposto a aceitar
-        bid: Preço que um comprador está disposto a pagar
-        last: Último preço negociado
-
-        Se estou comprado, a recompensa é a diferença entre o preço de aquisição e o preço de venda.
-        Se estou vendido, a recompensa é a diferença entre o preço de aquisição e o preço de compra.
-
-        formulas para calcular a recompensa:
-        
-        comprar
-            preco_adquire = ask
-            recompensa = bid - preco_adquire
-            
-        vender
-            preco_adquire = bid
-            recompensa =  preco_adquire - ask
-
-        comprado: recompensa = preço de venda - preço de aquisição
-        vendido: recompensa = preço de aquisição - preço de compra
-        '''
         if self.position == 0:
             if action == 0:
                 self.position = action
@@ -271,18 +255,3 @@ if __name__ == '__main__':
 
         print('-' * 50)
 
-'''
-Considere as operações de compra e venda de ações. O agente pode comprar, vender ou manter a posição.
-
-ask: Preço que um vendedor está disposto a aceitar
-bid: Preço que um comprador está disposto a pagar
-last: Último preço negociado
-
-Se estou comprado, a recompensa é a diferença entre o preço de aquisição e o preço de venda.
-Se estou vendido, a recompensa é a diferença entre o preço de aquisição e o preço de compra.
-
-formulas para calcular a recompensa:
-
-comprado: recompensa = preço de venda - preço de aquisição
-vendido: recompensa = preço de aquisição - preço de compra
-'''

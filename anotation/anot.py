@@ -68,3 +68,29 @@ Aprendizado por reforço
 
 
 '''
+
+'''
+Estou precisando representar através de um fluxograma a estrutura do sistema de trading.
+Estou usando um algoritmo de aprendizado por reforço para tomar decisões de compra, venda ou manutenção de ações.
+Pode me ajudar por favor?
+'''
+
+'''
+Algoritmo de trading usando aprendizado por reforço
+
+'''
+'''
+Considere as operações de compra e venda de ações. O agente pode comprar, vender ou manter a posição.
+
+ask: Preço que um vendedor está disposto a aceitar
+bid: Preço que um comprador está disposto a pagar
+last: Último preço negociado
+
+Se estou comprado, a recompensa é a diferença entre o preço de aquisição e o preço de venda.
+Se estou vendido, a recompensa é a diferença entre o preço de aquisição e o preço de compra.
+
+formulas para calcular a recompensa:
+
+comprado: recompensa = preço de venda - preço de aquisição
+vendido: recompensa = preço de aquisição - preço de compra
+'''

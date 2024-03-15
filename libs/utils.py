@@ -69,3 +69,13 @@ def excluir_valores(df):
     except Exception as e:
         print('Erro ao excluir as linhas que contém zeros: ', e)
         raise e
+
+def normalize(df):
+    ''' Normaliza os valores do DataFrame'''
+    try:
+        # Normalizar os valores do DataFrame
+        df = (df - df.mean()) / df.std()
+        return df
+    except Exception as e:
+        print('Erro ao normalizar os valores do DataFrame: ', e)
+        raise e
