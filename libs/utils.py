@@ -46,6 +46,10 @@ def excluir_zeros(df):
     :return: DataFrame sem as linhas que contém zeros.
     """
     try:
+        print('Excluindo as linhas que contém zeros...')
+        print(df)
+        print(df.shape)
+        print('----'*10)
         # Excluir as linhas que contém zeros
         df = df[(df != 0).all(1)]
 

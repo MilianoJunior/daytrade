@@ -68,6 +68,7 @@ class Padroes:
         ex: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] -> [1, 2, 3] = 1
         frequencia[x] = quantidade de vezes que o padrão x aparece na série
         """
+        print(serie)
         # verifica o valor de bid e ask
         if isinstance(serie, list):
             times = serie[0]
@@ -157,7 +158,7 @@ class Padroes:
         Retorna os ticks de uma série.
         """
         # Definir o número de linhas de dados
-        num_rows = 10
+        num_rows = 10000
 
         # Gerar horários aleatórios dentro do intervalo especificado (convertido para segundos para facilitar)
         time_start = pd.Timestamp('2024-03-03 09:00').timestamp()

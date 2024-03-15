@@ -60,17 +60,21 @@ class Agente:
         return np.argmax(action_probabilities[0])  # Exploração
 
 
-    def train(self, data):
+    def train(self, data, verbose=False):
         ''' Treina o modelo com base nas experiências'''
         # state, action, reward, next_state
         for state, action, reward, next_state in data:
           target_f = self.equacao_bellman(state, action, reward, next_state)
-
-          self.model.fit(state[None, :], target_f, epochs=1, verbose=0)
+          if verbose:
+              print('......' * 20)
+              print('Target_f 2: ', target_f.reshape(1, -1))
+              print('state: ', state[None, :])
+              print('Reward: ', reward)
+          self.model.fit(state[None, :], target_f.reshape(1, -1), epochs=1, verbose=verbose)
 
     def equacao_bellman(self, state, action, reward, next_state):
         ''' Calcula a equação de Bellman com ajustes.'''
-        print('-------------------' * 5)
+        # print('-------------------' * 5)
         # print('Estado: ', state)
         # print('Ação: ', action)
         # print('Recompensa: ', reward)
@@ -83,21 +87,22 @@ class Agente:
 
         proximo = next_state[None, :]
 
-        print('none: ', next_state[None, :])
-        previsao = self.model.predict(proximo)
-        print('Previsão 1: ', previsao)
+        # print('none: ', next_state[None, :])
+        previsao = self.model.predict(proximo, verbose=0)
+        # print('Previsão 1: ', previsao)
+        # previsao = random.choice([0, 1, 2])
         next = np.argmax(previsao)
 
-        print('Next: ', next)
+        # print('Next: ', next)
         if np.any(np.isnan(next)) or np.any(np.isinf(next)):
             print("Existem valores NaN ou infinitos nos próximos estados.")
-            return random.choice([0, 1, 2])
+            next = random.choice([0, 1, 2])
 
         target = reward + self.explore_rate * np.amax(next)
 
-        print('Target: ', target)
-        target_f = self.model.predict(proximo)
-        print('Target_f 1: ', target_f)
+        # print('Target: ', target)
+        # target_f = self.model.predict(proximo)
+        # print('Target_f 1: ', target_f)
         # Calcula valor_1 baseado no target, considerando a condição de valores negativos
         valor_1 = target / 100
 
@@ -123,31 +128,15 @@ class Agente:
         target_f[index1] = valor_2
         target_f[index2] = valor_3
 
-        return target_f
-
-
         # Ajuste da taxa de exploração, se necessário
         self.explore_rate *= 0.995
 
-        print('Target_f: ', target_f)
-
         return target_f
 
-        '''
-        resultado:
-            Estado:  [1.7080741e+09 1.3022500e+05 1.3023500e+05 1.3022500e+05 6.0000000e+00
-            1.7080741e+12 6.0000000e+00 6.0000000e+00 1.0000000e+01]
-            Ação:  0
-            Recompensa:  35.0
-            Próximo estado:  [1.7080741e+09 1.3023000e+05 1.3023500e+05 1.3023500e+05 1.0000000e+00
-            1.7080741e+12 2.0000000e+00 1.0000000e+00 5.0000000e+00]
-            Target:  nan
-            
-            1/1 [==============================] - 0s 13ms/step
-            1/1 [==============================] - 0s 13ms/step
-            Target_f:  [[nan nan nan]]
 
-        '''
+
+
+
     # def equacao_bellman(self, state, action, reward, next_state):
     #     ''' Calcula a equação de Bellman'''
     #

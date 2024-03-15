@@ -27,20 +27,26 @@ class B3(py_environment.PyEnvironment):
         # aplicar configurações para o ambiente
         self.mode = config.get('policy', 'random')
         self.conti = 0
-        if self.mode == 'random':
-            try:
-                self.data = Dados(config.get('login',False), config.get('password',False)).get_ticks(config.get('symbol',False), 16, 17, 2, 2024)
-                self.data = excluir_zeros(self.data)
-                self.data = excluir_valores(self.data)
-            except Exception as e:
-                print('Erro ao buscar dados da B3. Gerando dados aleatórios: ', e)
-                self.data = Padroes().get_ticks()
-        else:
-            # self.data = Dados(login, password).get_last_tick(config.get('symbol',False))
-            self.data = Dados(config.get('login', False), config.get('password', False)).get_ticks(
-                config.get('symbol', False), 16, 17, 2, 2024)
+        # if self.mode == 'random':
+        try:
+            self.data = Dados(config.get('login',False), config.get('password',False)).get_ticks(config.get('symbol',False), 16, 17, 2, 2024)
             self.data = excluir_zeros(self.data)
             self.data = excluir_valores(self.data)
+        except Exception as e:
+            print('Erro ao buscar dados da B3. Gerando dados aleatórios: ', e)
+            self.data = Padroes().get_ticks()
+            self.data = excluir_zeros(self.data)
+            self.data = excluir_valores(self.data)
+        # else:
+        #     try:
+        #         self.data = Dados(config.get('login',False), config.get('password',False)).get_ticks(config.get('symbol',False), 16, 17, 2, 2024)
+        #         self.data = excluir_zeros(self.data)
+        #         self.data = excluir_valores(self.data)
+        #     except Exception as e:
+        #         print('Erro ao buscar dados da B3. Gerando dados aleatórios: ', e)
+        #         self.data = Padroes().get_ticks()
+        #         self.data = excluir_zeros(self.data)
+        #         self.data = excluir_valores(self.data)
             # self.data = normalize(self.data)
 
         self.index = 0
@@ -183,12 +189,12 @@ class B3(py_environment.PyEnvironment):
             elif action == 1:
                 # se estiver comprando, o preço de aquisição é o ask
                 self.position = action
-                self.price_adquire = round(ask)
+                self.price_adquire = ask
                 recompensa = 0
             else:
                 # se estiver vendendo, o preço de aquisição é o bid
                 self.position = action
-                self.price_adquire = round(bid)
+                self.price_adquire = bid
                 recompensa = 0
             return recompensa
 

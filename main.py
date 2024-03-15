@@ -60,21 +60,17 @@ for episode in range(0,config['num_episodes']):
         avaliacao.record_step(state, action, next_state, reward, env.position, env.price_adquire, verbose=False)
         cont += 1
 
-        if cont > 100 or cont2 > 10:
+        if cont > 200 or cont2 > 10:
             print('Treinando...')
             cont = 0
             cont2 += 1
-            # for s in avaliacao.data:
-            #     cont += 1
-            #     print(cont, s)
-            #     print('............' * 5)
-            # print(avaliacao.data)
+            print('Qtd : ',len(avaliacao.data))
             agente.train(avaliacao.data)
-            print(' valor: ', avaliacao.position_data['acumulado'].values[-1])
-
-            # break
-        # print('1: ', next_state.step_type)
-        # time.sleep(10)
+            avaliacao.data = []
+            print(cont2,' - valor: ', avaliacao.position_data['acumulado'].values[-2])
+            print('---'*20)
+            avaliacao.plot_trading_results()
+            # avaliacao.update_data_and_plot()
         if next_state.step_type == 2: # or cont > 2000:  # Verifica se o episódio terminou
             break
         state = next_state
@@ -92,6 +88,9 @@ print('Fim do treinamento')
 print(avaliacao.position_data.shape)
 fim = time.time()
 print(f'Tempo de execução: {fim - inicio} segundos')
+
+# prin(env.data.values[0:10])
+# raise SystemExit
 
 
 
