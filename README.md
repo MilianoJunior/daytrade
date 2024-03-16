@@ -34,7 +34,7 @@ O ambiente de negociação é mapeado para um espaço de estados e ações.
 A métrica mais comum usada para avaliar uma política é o retorno médio. O retorno é a soma das recompensas obtidas durante a execução de uma política em um ambiente para um episódio, e normalmente fazemos a média disso em alguns episódios. Podemos calcular a métrica de retorno médio da seguinte maneira.
 
 
-![resultados](https://github.com/MilianoJunior/daytrade/blob/main/resultados.png)
+![resultados](https://github.com/MilianoJunior/daytrade/blob/main/resultado.png)
 
 ## Referências
 
