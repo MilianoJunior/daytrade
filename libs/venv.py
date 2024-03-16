@@ -27,9 +27,9 @@ class B3(py_environment.PyEnvironment):
         # aplicar configurações para o ambiente
         self.mode = config.get('policy', 'random')
         self.conti = 0
-        # if self.mode == 'random':
+
         try:
-            self.data = Dados(config.get('login',False), config.get('password',False)).get_ticks(config.get('symbol',False), 16, 17, 2, 2024)
+            self.data = Dados(config.get('login',False), config.get('password',False)).get_ticks(config.get('symbol',False), 19, 23, 2, 2024)
             self.data = excluir_zeros(self.data)
             self.data = excluir_valores(self.data)
             self.data = normalize(self.data)

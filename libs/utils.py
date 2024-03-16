@@ -80,6 +80,9 @@ def normalize(df):
     ''' Normaliza os valores do DataFrame'''
     try:
         # Normalizar os valores do DataFrame
+        std = df.std()
+        mean = df.mean()
+
         df = (df - df.mean()) / df.std()
         return df
     except Exception as e:

@@ -109,35 +109,33 @@ class TradingDataStore:
     def plot_trading_results(self, explore_rate):
         ''' Plota os resultados do trading'''
 
-        # plotar o valor acumulado das vendas
-        df_vendas = self.position_data[self.position_data['tipo'] == 'Venda']
-        df_vendas['acumulado'] = df_vendas['resultado'].cumsum()
-
         # Cria uma cópia do DataFrame antes de modificá-lo
         df_vendas = self.position_data[self.position_data['tipo'] == 'Venda'].copy()
-        df_vendas['acumulado'] = df_vendas['resultado'].cumsum()
+        df_vendas.loc[:, 'acumulado'] = df_vendas['resultado'].cumsum()
+        qtd_vendas = df_vendas.shape[0]
 
         plt.figure(figsize=(12, 6))
         plt.subplot(3, 1, 1)
-        plt.plot(df_vendas['acumulado'], label='Soma das recompensas Vendas', color='red')
-        plt.title('Trading Performance Vendas')
+        plt.plot(df_vendas['acumulado'], label=f'Recompensas Vendas (Qtd: {qtd_vendas})', color='red')
+        plt.title('Trading Vendas - Periódo 19/02 á 23/03 - 2024')
         plt.ylabel('Ganhos')
         plt.legend()
 
         # Cria uma cópia do DataFrame antes de modificá-lo
         df_compras = self.position_data[self.position_data['tipo'] == 'Compra'].copy()
-        df_compras['acumulado'] = df_compras['resultado'].cumsum()
+        df_compras.loc[:,'acumulado'] = df_compras['resultado'].cumsum()
+        qtd_compras = df_compras.shape[0]
 
         plt.subplot(3, 1, 2)
-        plt.plot(df_compras['acumulado'], label='Soma das recompensas Compras', color='blue')
-        plt.xlabel('Trading Performance Vendas')
+        plt.plot(df_compras['acumulado'], label=f'Recompensas Compras (Qtd: {qtd_compras})', color='blue')
+        plt.xlabel('Trading Vendas')
         plt.ylabel('Reward')
         plt.legend()
 
         # plotar o valor acumulado total
         plt.subplot(3, 1, 3)
-        plt.plot(self.position_data['acumulado'], label='Soma das recompensas Total', color='green')
-        plt.xlabel('Trading Performance Total')
+        plt.plot(self.position_data['acumulado'], label=f'Total (Exploratoria: {explore_rate:.3f})', color='green')
+        plt.xlabel('TradingTotal')
         plt.ylabel('Reward')
         plt.legend()
 

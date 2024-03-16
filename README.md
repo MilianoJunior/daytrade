@@ -29,16 +29,14 @@ pip install -r requirements.txt
 O ambiente de negociação é mapeado para um espaço de estados e ações. 
 
 
-## Gerar um relatório sobre as regras de negócio
+## Métricas de Avaliação
 
-## Quais as modificações que você fez no projeto
-
-
-windi = 125.650
+A métrica mais comum usada para avaliar uma política é o retorno médio. O retorno é a soma das recompensas obtidas durante a execução de uma política em um ambiente para um episódio, e normalmente fazemos a média disso em alguns episódios. Podemos calcular a métrica de retorno médio da seguinte maneira.
 
 
-compra = 125.65
+![resultados](https://github.com/MilianoJunior/daytrade/blob/main/resultados.png)
 
-windi = 125.690
+## Referências
 
-Venda = 40
+- [Tf-Agents](https://www.tensorflow.org/agents/tutorials/6_reinforce_tutorial?hl=pt-br#metrics_and_evaluation)
+- [Reinforcement Learning for Trading](https://www.amazon.com/Reinforcement-Learning-Trading-Strategies-Implementing/dp/180107970X)

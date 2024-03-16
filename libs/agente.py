@@ -113,7 +113,7 @@ class Agente:
         target_f[index2] = valor_3
 
         # Ajuste da taxa de exploração, se necessário
-        self.explore_rate -= 0.001
+        self.explore_rate -= 0.0001
 
         return target_f
 

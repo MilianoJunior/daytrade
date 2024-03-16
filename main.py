@@ -28,8 +28,8 @@ config = {
         'password': os.getenv('PASSWORD'),        # Senha da corretora
         'symbol': os.getenv('SYMBOL'),            # Ativo a ser negociado
         'policy': 'neural',                       #  Modo do Agente (Rondomico, Modelo)
-        'num_episodes': 1,                        # Defina o número de episódios para treinamento
-        'batch_size': 32,                         # Tamanho do lote
+        'num_episodes': 3,                        # Defina o número de episódios para treinamento
+        'batch_size': 256,                         # Tamanho do lote
 }
 '''
     instanciar classes
@@ -51,6 +51,7 @@ for episode in range(0,config['num_episodes']):
 
     # Inicializa o ambiente
     state = env.reset()
+    avaliacao.data = []
 
     # variáveis de controle
     counter = 0
@@ -78,7 +79,7 @@ for episode in range(0,config['num_episodes']):
             avaliacao.data = []
 
             avaliacao.plot_trading_results(agente.explore_rate)
-            # avaliacao.update_data_and_plot()
+
         if next_state.step_type == 2:
             break
         state = next_state
@@ -89,17 +90,17 @@ for episode in range(0,config['num_episodes']):
     avaliacao.end_episode()  # Finaliza o episódio no sistema de avaliação
     break
 
-# avaliacao.plot_trading_results()  # Plota os resultados do trading
+
 print('Fim do treinamento')
 
-# Usar tabulate para imprimir o DataFrame
-# print(tabulate(avaliacao.position_data, headers='keys', tablefmt='psql'))
+
 print(avaliacao.position_data.shape)
 fim = time.time()
 print(f'Tempo de execução: {fim - inicio} segundos')
 
-# prin(env.data.values[0:10])
-# raise SystemExit
+
+
+
 
 
 
