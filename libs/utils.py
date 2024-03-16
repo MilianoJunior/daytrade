@@ -46,10 +46,6 @@ def excluir_zeros(df):
     :return: DataFrame sem as linhas que contém zeros.
     """
     try:
-        print('Excluindo as linhas que contém zeros...')
-        print(df)
-        print(df.shape)
-        print('----'*10)
         # Excluir as linhas que contém zeros
         df = df[(df != 0).all(1)]
 
@@ -68,7 +64,13 @@ def excluir_valores(df):
         # print('----'*10)
         df = df[(df['diferenca'] < 50) & (df['diferenca'] > -50)]
         df_counts = df['diferenca'].value_counts()
-        # print('diferenca:', df_counts)
+
+        df = df.drop('diferenca', axis=1)
+        df = df.drop('time', axis=1)
+        df = df.drop('time_msc', axis=1)
+
+        # Excluir a coluna timestamp
+
         return df
     except Exception as e:
         print('Erro ao excluir as linhas que contém zeros: ', e)

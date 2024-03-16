@@ -19,7 +19,7 @@ class Agente:
         self.policy = config['policy']
 
         # Taxa de exploração
-        self.explore_rate = 0.1
+        self.explore_rate = 0.98
 
         # Inicializa a política de exploração
         if not self.policy == 'random':
@@ -32,7 +32,7 @@ class Agente:
         ''' Seleciona a política de exploração'''
 
         model = tf.keras.Sequential([
-            layers.Dense(64, activation='relu', input_shape=(9,)),  # 9 entradas correspondendo aos seus recursos
+            layers.Dense(64, activation='relu', input_shape=(6,)),  # 9 entradas correspondendo aos seus recursos
             layers.Dense(32, activation='relu'),
             layers.Dense(3, activation='linear')  # Saída para os valores Q de 3 ações: comprar, vender, manter
         ])
@@ -50,12 +50,9 @@ class Agente:
         if self.explore_rate > np.random.rand():
             return np.random.randint(3)
 
-        # print('Estado atual: ', state)
-
         # Política de exploração Greedy
         action_probabilities = self.model.predict(state.reshape(1, -1), verbose=0)
 
-        # print('Probabilidades das ações: ', action_probabilities[0])
 
         return np.argmax(action_probabilities[0])  # Exploração
 
@@ -74,36 +71,23 @@ class Agente:
 
     def equacao_bellman(self, state, action, reward, next_state):
         ''' Calcula a equação de Bellman com ajustes.'''
-        # print('-------------------' * 5)
-        # print('Estado: ', state)
-        # print('Ação: ', action)
-        # print('Recompensa: ', reward)
-        # print('Próximo estado: ', next_state)
 
         # Verifique se algum dos estados ou a recompensa contém NaN ou infinito
         if np.any(np.isnan(state)) or np.any(np.isnan(next_state)) or np.isnan(reward):
             print("Existem valores NaN nos estados ou na recompensa.")
             return None
 
-        proximo = next_state[None, :]
+        previsao = self.model.predict(next_state[None, :], verbose=0)
 
-        # print('none: ', next_state[None, :])
-        previsao = self.model.predict(proximo, verbose=0)
-        # print('Previsão 1: ', previsao)
-        # previsao = random.choice([0, 1, 2])
         next = np.argmax(previsao)
 
-        # print('Next: ', next)
         if np.any(np.isnan(next)) or np.any(np.isinf(next)):
             print("Existem valores NaN ou infinitos nos próximos estados.")
             next = random.choice([0, 1, 2])
 
         target = reward + self.explore_rate * np.amax(next)
 
-        # print('Target: ', target)
-        # target_f = self.model.predict(proximo)
-        # print('Target_f 1: ', target_f)
-        # Calcula valor_1 baseado no target, considerando a condição de valores negativos
+
         valor_1 = target / 100
 
         # Garante que valor_2 seja sempre maior que valor_1 e menor que 1
@@ -129,38 +113,9 @@ class Agente:
         target_f[index2] = valor_3
 
         # Ajuste da taxa de exploração, se necessário
-        self.explore_rate *= 0.995
+        self.explore_rate -= 0.001
 
         return target_f
-
-
-
-
-
-    # def equacao_bellman(self, state, action, reward, next_state):
-    #     ''' Calcula a equação de Bellman'''
-    #
-    #     print('Estado: ', state)
-    #     print('Ação: ', action)
-    #     print('Recompensa: ', reward)
-    #     print('Próximo estado: ', next_state)
-    #
-    #     target = reward  # Se o estado é terminal
-    #     # Prever o valor Q futuro para o próximo estado e tomar a ação de maior valor
-    #     target = reward + self.explore_rate * np.amax(self.model.predict(next_state[None, :])[0])\
-    #
-    #     print('Target: ', target)
-    #     # Prever os valores Q para o estado atual
-    #     target_f = self.model.predict(state[None, :])
-    #     # Atualizar o valor alvo para a ação tomada
-    #     target_f[0][action] = target
-    #
-    #     self.explore_rate *= 0.995  # Decaimento da taxa de exploração
-    #
-    #     print('Target_f: ', target_f)
-    #
-    #
-    #     return target_f
 
 
 

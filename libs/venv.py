@@ -32,22 +32,12 @@ class B3(py_environment.PyEnvironment):
             self.data = Dados(config.get('login',False), config.get('password',False)).get_ticks(config.get('symbol',False), 16, 17, 2, 2024)
             self.data = excluir_zeros(self.data)
             self.data = excluir_valores(self.data)
+            self.data = normalize(self.data)
         except Exception as e:
             print('Erro ao buscar dados da B3. Gerando dados aleatórios: ', e)
             self.data = Padroes().get_ticks()
             self.data = excluir_zeros(self.data)
             self.data = excluir_valores(self.data)
-        # else:
-        #     try:
-        #         self.data = Dados(config.get('login',False), config.get('password',False)).get_ticks(config.get('symbol',False), 16, 17, 2, 2024)
-        #         self.data = excluir_zeros(self.data)
-        #         self.data = excluir_valores(self.data)
-        #     except Exception as e:
-        #         print('Erro ao buscar dados da B3. Gerando dados aleatórios: ', e)
-        #         self.data = Padroes().get_ticks()
-        #         self.data = excluir_zeros(self.data)
-        #         self.data = excluir_valores(self.data)
-            # self.data = normalize(self.data)
 
         self.index = 0
         self.time_frame = 1
@@ -98,11 +88,6 @@ class B3(py_environment.PyEnvironment):
             bid = self.data.iloc[self._state]['bid']  # Preço que um comprador está disposto a pagar
             self.conti += 1
             self.volume += self.data.iloc[self._state]['volume']
-            if self._state % 100000 == 0:
-                percentual = (self._state / len(self.data)) * 100
-                print(' ' * 20, '...' * 20)
-                print(' ' * 20, 'Percentual:', round(percentual, 2), '%', self._state, len(self.data))
-                print(' ' * 20, '...' * 20)
 
                 # time.sleep(3)
             if bid != self.price_bid or ask != self.price_ask: # or self.volume > 10:
@@ -110,9 +95,6 @@ class B3(py_environment.PyEnvironment):
                 self.price_ask = ask
 
 
-                # print(' '*20,'...'*20)
-                # print(' '*40,'conti: ',self.conti,'state: ',self._state, 'ask:', ask, ' bid:', bid, ' volume:', self.volume)
-                # print(' '*20,'...' * 20)
                 self.conti = 0
                 self.volume = 0
                 break
@@ -122,13 +104,6 @@ class B3(py_environment.PyEnvironment):
                 print('Episódio terminado')
                 break
 
-            # Atualiza o estado (aqui pode-se avançar no time frame)
-
-
-            # if self._state % 10000 == 0:
-            # print('...'*20, self._state, 'ask:', ask, ' bid:', bid)
-            # print('...'*20, self._state, 'ask:', ask, ' bid:', bid) 1 - 119445 2 -
-
         # O último passo terminou o episódio. Chama reset para iniciar um novo episódio.
         if self._episode_ended:
             return self.reset()
@@ -136,16 +111,12 @@ class B3(py_environment.PyEnvironment):
         # calcula a recompensa
         recompensa = self._calcular_recompensa(action)
 
-
-
-        # print('Índice:', self._state)
         # atualiza o estado do ambiente
         if self._state >= len(self.data) - self.time_frame:
             self._episode_ended = True
             print('Episódio terminado')
 
         # novo time_step com os dados do ambiente
-        # numeric_data = self.data.select_dtypes(include=[np.number]).values[self._state]
         numeric_data = self.data.iloc[self._state]
         # Retorna o novo time_step
         if self._episode_ended:

@@ -24,59 +24,68 @@ os.environ['ROOT'] = BASE_DIR
     configurações dos parâmetros
 '''
 config = {
-        'login': os.getenv('LOGIN'),
-        'password': os.getenv('PASSWORD'),
-        'symbol': os.getenv('SYMBOL'),
-        'policy': 'neural',                      # Modo do Agente (Rondomico, Modelo)
-        'num_episodes': 1                      # Defina o número de episódios para treinamento
+        'login': os.getenv('LOGIN'),              # Login da corretora
+        'password': os.getenv('PASSWORD'),        # Senha da corretora
+        'symbol': os.getenv('SYMBOL'),            # Ativo a ser negociado
+        'policy': 'neural',                       #  Modo do Agente (Rondomico, Modelo)
+        'num_episodes': 1,                        # Defina o número de episódios para treinamento
+        'batch_size': 32,                         # Tamanho do lote
 }
 '''
     instanciar classes
 '''
 
-env = B3(config)                                # Simula o ambiente de negociação da bolsa de valores
-agente = Agente(config)                # Instancia o agente de trading
+# Instancia o ambiente de trading
+env = B3(config)
+
+# Instancia o agente de trading
+agente = Agente(config)
+
+# Instancia o sistema de avaliação
 avaliacao = TradingDataStore()
 
 inicio = time.time()
 
-# print(env.data.columns)
-# print(env.data.values[-1])
-
-# raise Exception('Erro ao processar o DataFrame: ')
+# Treinamento do agente
 for episode in range(0,config['num_episodes']):
-    state = env.reset()                         # Inicializa o ambiente
-    episode_reward = 0
-    cont = 0
-    cont2 = 0
-    while True:
-        action = agente.decide_action(state.observation)  # O agente decide a ação
-        # action = agente.decide_action()
-        next_state = env.step(action)  # Atualiza o ambiente com a ação do agente
-        reward = next_state.reward  # Obtem a recompensa
-        episode_reward += reward
-        # print(action)
-        # Armazena e avalia o desempenho
-        avaliacao.record_step(state, action, next_state, reward, env.position, env.price_adquire, verbose=False)
-        cont += 1
 
-        if cont > 200 or cont2 > 10:
+    # Inicializa o ambiente
+    state = env.reset()
+
+    # variáveis de controle
+    counter = 0
+
+    while True:
+
+        # agente decide a ação {0: 'Manter', 1: 'Comprar', 2:'Vender'} a ser tomada com base no estado atual
+        action = agente.decide_action(state.observation)
+
+        # Atualiza o ambiente com a ação do agente
+        next_state = env.step(action)
+
+        # Obtem a recompensa
+        reward = next_state.reward
+
+        # Armazena as experiências do agente
+        avaliacao.record_step(state, action, next_state, reward, env.position, env.price_adquire, verbose=False)
+
+        # Treina o modelo com base nas experiências
+        if config['batch_size'] < len(avaliacao.data):
             print('Treinando...')
-            cont = 0
-            cont2 += 1
-            print('Qtd : ',len(avaliacao.data))
+            percentual = (env._state / len(env.data)) * 100
+            print('index: ',env._state, 'faltante: ', env.data.shape[0] - env._state, 'percentual: ', percentual, '%')
             agente.train(avaliacao.data)
             avaliacao.data = []
-            print(cont2,' - valor: ', avaliacao.position_data['acumulado'].values[-2])
-            print('---'*20)
-            avaliacao.plot_trading_results()
+
+            avaliacao.plot_trading_results(agente.explore_rate)
             # avaliacao.update_data_and_plot()
-        if next_state.step_type == 2: # or cont > 2000:  # Verifica se o episódio terminou
+        if next_state.step_type == 2:
             break
         state = next_state
 
+    counter += 1
     print(f'Episódio: {episode}, Recompensa Total: {avaliacao.position_data["resultado"].sum()}')
-        # time.sleep(1)
+
     avaliacao.end_episode()  # Finaliza o episódio no sistema de avaliação
     break
 

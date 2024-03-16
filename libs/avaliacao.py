@@ -106,75 +106,38 @@ class TradingDataStore:
 
         self.data['positions'].append(position)
 
-    def update_data_and_plot(self):
-        # Encerra o processo anterior se ele ainda estiver rodando
-        if self.process is not None and self.process.is_alive():
-            self.process.terminate()
-            self.process.join()  # Espera o processo ser encerrado
+    def plot_trading_results(self, explore_rate):
+        ''' Plota os resultados do trading'''
 
-        # Cria e inicia um novo processo
-        self.process = Process(target=self.plot_graph, args=(self.position_data['acumulado'], self.position_data['resultado']))
-        self.process.start()
+        # plotar o valor acumulado das vendas
+        df_vendas = self.position_data[self.position_data['tipo'] == 'Venda']
+        df_vendas['acumulado'] = df_vendas['resultado'].cumsum()
 
-    def plot_graph(self, acumulado, resultado):
-        import matplotlib.pyplot as plt
+        # Cria uma cópia do DataFrame antes de modificá-lo
+        df_vendas = self.position_data[self.position_data['tipo'] == 'Venda'].copy()
+        df_vendas['acumulado'] = df_vendas['resultado'].cumsum()
+
         plt.figure(figsize=(12, 6))
-
-        plt.subplot(2, 1, 1)
-        plt.plot(acumulado, label='Soma das recompensas', color='blue')
-        plt.title('Trading Performance')
+        plt.subplot(3, 1, 1)
+        plt.plot(df_vendas['acumulado'], label='Soma das recompensas Vendas', color='red')
+        plt.title('Trading Performance Vendas')
         plt.ylabel('Ganhos')
         plt.legend()
 
-        plt.subplot(2, 1, 2)
-        plt.plot(resultado, label='Reward', color='green')
-        plt.xlabel('Step')
+        # Cria uma cópia do DataFrame antes de modificá-lo
+        df_compras = self.position_data[self.position_data['tipo'] == 'Compra'].copy()
+        df_compras['acumulado'] = df_compras['resultado'].cumsum()
+
+        plt.subplot(3, 1, 2)
+        plt.plot(df_compras['acumulado'], label='Soma das recompensas Compras', color='blue')
+        plt.xlabel('Trading Performance Vendas')
         plt.ylabel('Reward')
         plt.legend()
 
-        plt.tight_layout()
-        plt.show()
-
-    # def plot_trading_results(self):
-    #     ''' Plota os resultados do trading de forma dinâmica em um thread separado '''
-    #
-    #     def run_plot():
-    #         fig, axs = plt.subplots(2, 1, figsize=(12, 6))
-    #
-    #         def update(frame):
-    #             axs[0].clear()
-    #             axs[1].clear()
-    #
-    #             axs[0].plot(self.position_data['acumulado'], label='Soma das recompensas', color='blue')
-    #             axs[0].set_title('Trading Performance')
-    #             axs[0].set_ylabel('Ganhos')
-    #             axs[0].legend()
-    #
-    #             axs[1].plot(self.position_data['resultado'], label='Reward', color='green')
-    #             axs[1].set_xlabel('Step')
-    #             axs[1].set_ylabel('Reward')
-    #             axs[1].legend()
-    #
-    #         ani = FuncAnimation(fig, update, interval=1000)  # Atualiza a cada 1000 ms
-    #         plt.tight_layout()
-    #         plt.show()
-    #
-    #     # Inicia o thread de plotagem
-    #     plot_thread = threading.Thread(target=run_plot)
-    #     plot_thread.start()
-
-    def plot_trading_results(self):
-        ''' Plota os resultados do trading'''
-
-        plt.figure(figsize=(12, 6))
-        plt.subplot(2, 1, 1)
-        plt.plot(self.position_data['acumulado'], label='Soma das recompensas', color='blue')
-        plt.title('Trading Performance')
-        plt.ylabel('Ganhos')
-        plt.legend()
-        plt.subplot(2, 1, 2)
-        plt.plot(self.position_data['resultado'], label='Reward', color='green')
-        plt.xlabel('Step')
+        # plotar o valor acumulado total
+        plt.subplot(3, 1, 3)
+        plt.plot(self.position_data['acumulado'], label='Soma das recompensas Total', color='green')
+        plt.xlabel('Trading Performance Total')
         plt.ylabel('Reward')
         plt.legend()
 
